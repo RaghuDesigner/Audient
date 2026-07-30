@@ -1,58 +1,30 @@
+@import "../styles/tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /*
- * Audient color tokens — generated from docs/DESIGN_TOKENS.md (Figma = source
- * of truth). Values are RGB channels (space-separated) so Tailwind can apply
- * opacity via rgb(var(--token) / <alpha-value>). Documented hex values are
- * transcribed exactly; derived tokens (needed by shadcn/ui) are marked.
+ * Global base styles. Token values live in src/styles/tokens.css.
+ * Do not hardcode brand colors or type sizes here — use tokens / Tailwind.
  */
-@layer base {
-  :root {
-    /* Documented (exact) */
-    --background: 255 255 255; /* #FFFFFF */
-    --surface: 248 253 255; /* #F8FDFF */
-    --primary: 28 1 142; /* #1C018E */
-    --secondary: 128 80 230; /* #8050E6 */
-    --success: 22 163 74; /* #16A34A */
-    --warning: 245 158 11; /* #F59E0B */
-    --destructive: 220 38 38; /* #DC2626 (Error) */
-
-    /* Derived — not in DESIGN_TOKENS.md */
-    --foreground: 15 23 42; /* primary text */
-    --primary-foreground: 255 255 255;
-    --secondary-foreground: 255 255 255;
-    --success-foreground: 255 255 255;
-    --warning-foreground: 15 23 42;
-    --destructive-foreground: 255 255 255;
-
-    --card: 248 253 255; /* = Surface */
-    --card-foreground: 15 23 42;
-    --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
-
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139;
-    --accent: 241 245 249;
-    --accent-foreground: 15 23 42;
-
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 28 1 142; /* = Primary */
-
-    /* Audit severity (Critical=Error, Major=Warning, Minor derived) */
-    --severity-critical: 220 38 38;
-    --severity-major: 245 158 11;
-    --severity-minor: 100 116 139;
-  }
-}
-
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

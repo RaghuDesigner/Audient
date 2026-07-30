@@ -1,0 +1,153 @@
+/*
+ * Audient design tokens (CSS custom properties)
+ * Source of truth: docs/DESIGN_TOKENS.md ← Figma Design Tokens
+ *
+ * Documented = transcribed exactly from Figma / DESIGN_TOKENS.md
+ * Derived    = required for Tailwind/shadcn/UI; not specified in Figma
+ *
+ * Colors use space-separated RGB channels so Tailwind can apply
+ * opacity: rgb(var(--token) / <alpha-value>).
+ */
+
+:root {
+  /* ============================================================ Colors
+   * Documented (exact hex → RGB channels)
+   */
+  --background: 255 255 255; /* #FFFFFF */
+  --surface: 248 253 255; /* #F8FDFF */
+  --primary: 28 1 142; /* #1C018E */
+  --secondary: 128 80 230; /* #8050E6 */
+  --success: 22 163 74; /* #16A34A */
+  --warning: 245 158 11; /* #F59E0B */
+  --error: 220 38 38; /* #DC2626 */
+  --destructive: 220 38 38; /* alias of Error for shadcn */
+
+  /* Derived — shadcn / semantic UI (not in Figma token sheet) */
+  --foreground: 15 23 42;
+  --primary-foreground: 255 255 255;
+  --secondary-foreground: 255 255 255;
+  --success-foreground: 255 255 255;
+  --warning-foreground: 15 23 42;
+  --error-foreground: 255 255 255;
+  --destructive-foreground: 255 255 255;
+
+  --card: 248 253 255; /* = Surface */
+  --card-foreground: 15 23 42;
+  --popover: 255 255 255;
+  --popover-foreground: 15 23 42;
+
+  --muted: 241 245 249;
+  --muted-foreground: 100 116 139;
+  --accent: 241 245 249;
+  --accent-foreground: 15 23 42;
+
+  --border: 226 232 240;
+  --input: 226 232 240;
+  --ring: 28 1 142; /* = Primary */
+
+  /* Severity (Critical=Error, Major=Warning, Minor=neutral) */
+  --severity-critical: 220 38 38;
+  --severity-major: 245 158 11;
+  --severity-minor: 100 116 139;
+
+  /* ======================================================== Typography
+   * --font-sans is owned by next/font (Manrope) in src/app/layout.tsx.
+   * Do not redefine it here or the generated face will be overridden.
+   */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Font weights (documented) */
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Font sizes (documented) */
+  --font-size-info: 12px; /* infoBody */
+  --font-size-body-sm: 18px; /* smallBody */
+  --font-size-body: 24px; /* Body */
+  --font-size-body-lg: 32px; /* Body large */
+  --font-size-h2: 40px; /* Heading 2 */
+  --font-size-h1: 48px; /* Heading 1 */
+
+  /* Line heights (derived — not in Figma sheet) */
+  --line-height-none: 1;
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.35;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.65;
+
+  /* Letter spacing (derived — not in Figma sheet) */
+  --letter-spacing-tighter: -0.02em;
+  --letter-spacing-tight: -0.01em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.02em;
+
+  /* =========================================================== Spacing
+   * Documented scale: 8 / 16 / 24
+   */
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+
+  /* ===================================================== Border radius
+   * Documented: Small 4 / Medium 8 / Large 16
+   */
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* =========================================================== Shadows
+   * Named in Figma (SM / MD / LG); values derived (sheet has no CSS)
+   */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* =========================================================== Opacity
+   * Derived scale for disabled / overlays / media
+   */
+  --opacity-0: 0;
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-80: 0.8;
+  --opacity-100: 1;
+
+  /* ======================================================== Breakpoints
+   * Mobile-first (CURSOR_RULES §11). Documented here for parity with
+   * Tailwind theme.screens — CSS cannot consume these as media queries
+   * via custom properties in all browsers, so Tailwind screens are source
+   * for @media utilities.
+   */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1400px; /* container max; aligns with tailwind container */
+
+  /* ======================================================== Z-index
+   * Derived stacking scale for overlays / chrome
+   */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-tooltip: 500;
+
+  /* ====================================================== Transitions
+   * Derived motion tokens (honor prefers-reduced-motion in components)
+   */
+  --duration-fast: 150ms;
+  --duration-DEFAULT: 200ms;
+  --duration-slow: 300ms;
+  --ease-in-out-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}

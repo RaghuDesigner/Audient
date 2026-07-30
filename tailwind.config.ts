@@ -2,34 +2,44 @@ import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 
 /**
- * Audient design system — generated from docs/DESIGN_TOKENS.md (Figma = source
- * of truth). Documented values (colors, typography, spacing, radius) are
- * transcribed exactly; a small set of neutral/UI tokens required by shadcn/ui
- * is derived and marked below. Colors resolve from RGB-channel CSS variables
- * (see src/app/globals.css) via `rgb(var(--token) / <alpha-value>)`, which
- * preserves the exact hex values while supporting opacity modifiers.
+ * Audient Tailwind theme — maps design tokens to utilities.
+ *
+ * Source of truth: docs/DESIGN_TOKENS.md (Figma).
+ * CSS variable values: src/styles/tokens.css
+ *
+ * Documented values are transcribed exactly.
+ * Derived values (needed by shadcn / stacking / motion) are marked in tokens.css.
  */
 const config: Config = {
   darkMode: ["class"],
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
+    // ---------------------------------------------------------------- Breakpoints
+    // Mobile-first (CURSOR_RULES §11). Explicit so the scale is part of the theme.
+    screens: {
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1400px",
+    },
     container: {
       center: true,
       padding: {
-        DEFAULT: "1rem",
-        sm: "1.5rem",
-        lg: "2rem",
+        DEFAULT: "1rem", // 16px — spacing-md on mobile
+        lg: "1.5rem", // 24px — spacing-lg on desktop
       },
       screens: {
         "2xl": "1400px",
       },
     },
     extend: {
-      // ---------------------------------------------------------------- Colors
+      // ------------------------------------------------------------ Colors
       colors: {
-        // Documented (DESIGN_TOKENS.md)
         background: "rgb(var(--background) / <alpha-value>)",
         surface: "rgb(var(--surface) / <alpha-value>)",
+        foreground: "rgb(var(--foreground) / <alpha-value>)",
+
         primary: {
           DEFAULT: "rgb(var(--primary) / <alpha-value>)",
           foreground: "rgb(var(--primary-foreground) / <alpha-value>)",
@@ -46,13 +56,15 @@ const config: Config = {
           DEFAULT: "rgb(var(--warning) / <alpha-value>)",
           foreground: "rgb(var(--warning-foreground) / <alpha-value>)",
         },
+        error: {
+          DEFAULT: "rgb(var(--error) / <alpha-value>)",
+          foreground: "rgb(var(--error-foreground) / <alpha-value>)",
+        },
         destructive: {
           DEFAULT: "rgb(var(--destructive) / <alpha-value>)",
           foreground: "rgb(var(--destructive-foreground) / <alpha-value>)",
         },
 
-        // Derived (required by shadcn/ui; not in DESIGN_TOKENS.md)
-        foreground: "rgb(var(--foreground) / <alpha-value>)",
         card: {
           DEFAULT: "rgb(var(--card) / <alpha-value>)",
           foreground: "rgb(var(--card-foreground) / <alpha-value>)",
@@ -73,7 +85,6 @@ const config: Config = {
         input: "rgb(var(--input) / <alpha-value>)",
         ring: "rgb(var(--ring) / <alpha-value>)",
 
-        // Audit severity (Critical=Error, Major=Warning, Minor derived)
         severity: {
           critical: "rgb(var(--severity-critical) / <alpha-value>)",
           major: "rgb(var(--severity-major) / <alpha-value>)",
@@ -81,56 +92,145 @@ const config: Config = {
         },
       },
 
-      // ------------------------------------------------------------ Typography
+      // -------------------------------------------------------- Typography
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
-        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        mono: ["var(--font-mono)", "monospace"],
       },
-      // Sizes + weights transcribed exactly from DESIGN_TOKENS.md.
+
+      fontWeight: {
+        regular: "var(--font-weight-regular)", // 400 — Body*
+        semibold: "var(--font-weight-semibold)", // 600 — Heading 2
+        bold: "var(--font-weight-bold)", // 700 — Heading 1
+      },
+
       fontSize: {
-        info: ["12px", { fontWeight: "400" }], // infoBody
-        "body-sm": ["18px", { fontWeight: "400" }], // smallBody
-        body: ["24px", { fontWeight: "400" }], // Body
-        "body-lg": ["32px", { fontWeight: "400" }], // Body large
-        h2: ["40px", { fontWeight: "600" }], // Heading 2
-        h1: ["48px", { fontWeight: "700" }], // Heading 1
+        info: [
+          "var(--font-size-info)",
+          {
+            lineHeight: "var(--line-height-normal)",
+            fontWeight: "var(--font-weight-regular)",
+            letterSpacing: "var(--letter-spacing-normal)",
+          },
+        ],
+        "body-sm": [
+          "var(--font-size-body-sm)",
+          {
+            lineHeight: "var(--line-height-normal)",
+            fontWeight: "var(--font-weight-regular)",
+            letterSpacing: "var(--letter-spacing-normal)",
+          },
+        ],
+        body: [
+          "var(--font-size-body)",
+          {
+            lineHeight: "var(--line-height-normal)",
+            fontWeight: "var(--font-weight-regular)",
+            letterSpacing: "var(--letter-spacing-normal)",
+          },
+        ],
+        "body-lg": [
+          "var(--font-size-body-lg)",
+          {
+            lineHeight: "var(--line-height-snug)",
+            fontWeight: "var(--font-weight-regular)",
+            letterSpacing: "var(--letter-spacing-normal)",
+          },
+        ],
+        h2: [
+          "var(--font-size-h2)",
+          {
+            lineHeight: "var(--line-height-tight)",
+            fontWeight: "var(--font-weight-semibold)",
+            letterSpacing: "var(--letter-spacing-tight)",
+          },
+        ],
+        h1: [
+          "var(--font-size-h1)",
+          {
+            lineHeight: "var(--line-height-tight)",
+            fontWeight: "var(--font-weight-bold)",
+            letterSpacing: "var(--letter-spacing-tighter)",
+          },
+        ],
       },
 
-      // --------------------------------------------------------------- Spacing
-      // Design-system spacing scale (DESIGN_TOKENS.md) — Tailwind defaults kept.
+      lineHeight: {
+        none: "var(--line-height-none)",
+        tight: "var(--line-height-tight)",
+        snug: "var(--line-height-snug)",
+        normal: "var(--line-height-normal)",
+        relaxed: "var(--line-height-relaxed)",
+      },
+
+      letterSpacing: {
+        tighter: "var(--letter-spacing-tighter)",
+        tight: "var(--letter-spacing-tight)",
+        normal: "var(--letter-spacing-normal)",
+        wide: "var(--letter-spacing-wide)",
+      },
+
+      // ------------------------------------------------------------ Spacing
+      // Design-system scale (8 / 16 / 24). Tailwind numeric scale remains.
       spacing: {
-        sm: "8px",
-        md: "16px",
-        lg: "24px",
+        sm: "var(--spacing-sm)",
+        md: "var(--spacing-md)",
+        lg: "var(--spacing-lg)",
       },
 
-      // ---------------------------------------------------------------- Radius
+      // ------------------------------------------------------ Border radius
       borderRadius: {
-        none: "0px",
-        sm: "4px", // Small
-        md: "8px", // Medium
-        lg: "16px", // Large
-        full: "9999px",
+        none: "var(--radius-none)",
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
+        full: "var(--radius-full)",
       },
 
-      // --------------------------------------------------------- Shadows (std)
+      // ------------------------------------------------------------ Shadows
       boxShadow: {
         none: "none",
-        sm: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-        md: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-        lg: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
       },
 
-      // ------------------------------------------------------------ Animations
+      // ------------------------------------------------------------ Opacity
+      opacity: {
+        0: "var(--opacity-0)",
+        5: "var(--opacity-5)",
+        10: "var(--opacity-10)",
+        20: "var(--opacity-20)",
+        40: "var(--opacity-40)",
+        50: "var(--opacity-50)",
+        60: "var(--opacity-60)",
+        80: "var(--opacity-80)",
+        100: "var(--opacity-100)",
+      },
+
+      // ------------------------------------------------------------ Z-index
+      zIndex: {
+        base: "var(--z-base)",
+        raised: "var(--z-raised)",
+        dropdown: "var(--z-dropdown)",
+        sticky: "var(--z-sticky)",
+        overlay: "var(--z-overlay)",
+        modal: "var(--z-modal)",
+        toast: "var(--z-toast)",
+        tooltip: "var(--z-tooltip)",
+      },
+
+      // ------------------------------------------------------- Transitions
       transitionDuration: {
-        fast: "150ms",
-        DEFAULT: "200ms",
-        slow: "300ms",
+        fast: "var(--duration-fast)",
+        DEFAULT: "var(--duration-DEFAULT)",
+        slow: "var(--duration-slow)",
       },
       transitionTimingFunction: {
-        "in-out-smooth": "cubic-bezier(0.4, 0, 0.2, 1)",
-        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "in-out-smooth": "var(--ease-in-out-smooth)",
+        "out-expo": "var(--ease-out-expo)",
       },
+
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
