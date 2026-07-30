@@ -27,7 +27,7 @@ These are the engineering rules the AI (and all contributors) must follow when b
 **Why:** Accessibility is both an ethical and legal baseline — and uniquely important here because Audient *audits* accessibility. The product must exemplify what it recommends; shipping inaccessible UI would undermine credibility. AA is the widely accepted compliance target for GDPR/ADA-adjacent expectations.
 
 ### 4. Use TypeScript
-**Rule:** All code is written in **TypeScript** with strict typing. No implicit `any`; define and reuse types from `src/types` and generated Supabase/Prisma types. Public functions and component props have explicit types.
+**Rule:** All code is written in **TypeScript** with strict typing. No implicit `any`; define and reuse types from `src/types` and generated Supabase types. Public functions and component props have explicit types.
 
 **Why:** Static typing catches errors at compile time (before users hit them), makes refactoring safe, and documents intent. Shared types keep the frontend, API, and workers in sync — critical for correctness in credit/billing logic where a mismatch could cost money.
 

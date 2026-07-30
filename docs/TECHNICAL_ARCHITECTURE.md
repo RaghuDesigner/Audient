@@ -63,7 +63,7 @@ A modern, mostly managed stack chosen to maximize development speed, keep infras
 | Browser automation | **Playwright** | Render, screenshot, and crawl live sites |
 | Performance/a11y data | **Lighthouse / PageSpeed Insights + axe-core** | Objective speed & accessibility metrics |
 | Database | **PostgreSQL** (Supabase or Neon) | Relational integrity for users/credits/audits |
-| ORM | **Prisma** | Type-safe DB access in TypeScript |
+| DB access | **Supabase client + SQL** | Typed queries via supabase-js; complex logic via SQL/RPC |
 | Object storage | **Cloudflare R2 / AWS S3** | Store screenshots & generated PDFs cheaply |
 | Auth | **Clerk** (or Auth.js / Supabase Auth) | Secure, fast-to-integrate authentication |
 | Payments | **Stripe** | Industry standard for SaaS subscriptions |
@@ -104,8 +104,8 @@ A modern, mostly managed stack chosen to maximize development speed, keep infras
 
 ### 2.5 Data & Storage
 
-**PostgreSQL (Supabase or Neon) + Prisma**
-- **Why:** Audient's data is **relational and integrity-sensitive** — users, subscriptions, credit balances, audits, and reports with clear relationships. Postgres handles transactional credit deduction/refunds safely. Supabase/Neon provide a **managed, scalable** Postgres so there's no DB ops burden. Prisma adds type-safe queries in TypeScript.
+**PostgreSQL (Supabase)**
+- **Why:** Audient's data is **relational and integrity-sensitive** — users, subscriptions, credit balances, audits, and reports with clear relationships. Postgres handles transactional credit deduction/refunds safely. Supabase provides **managed Postgres**, Auth, Storage, and RLS. Type-safe access uses `@supabase/supabase-js` plus generated Database types; complex transactions use SQL/RPC.
 
 **Cloudflare R2 / AWS S3 (object storage)**
 - **Why:** Screenshots and generated PDFs are **large binary artifacts** that don't belong in a database. Object storage is cheap and scalable; **R2** is attractive for its zero egress fees (reports are downloaded frequently).
@@ -258,7 +258,6 @@ audient/
 │   └── styles/               # Global styles & Tailwind config entry
 ├── public/                   # Static assets (images, fonts, favicons)
 ├── docs/                     # Documentation (PRD, this architecture doc)
-├── prisma/                   # Prisma schema & migrations
 ├── workers/                  # Background job workers (audit pipeline)
 ├── tests/                    # Test suites (unit / integration / e2e)
 ├── .env.example              # Documented environment variables
@@ -324,7 +323,7 @@ src/hooks/
 ### 4.5 `src/lib/` — Integrations & Client Setup
 ```text
 src/lib/
-├── db.ts                     # Prisma client singleton
+├── supabase/                # Browser, server, and service-role clients
 ├── redis.ts                  # Redis / queue connection
 ├── stripe.ts                 # Stripe SDK client
 ├── storage.ts                # R2/S3 client + signed URL helpers
@@ -360,7 +359,6 @@ src/services/
 src/types/     # Shared types: Audit, Issue, Severity, Report, User, Tier, Credit
 src/utils/     # Pure helpers: formatting, scoring math, validation, constants
 src/styles/    # Tailwind entry, design tokens, global CSS
-prisma/        # schema.prisma + migrations (single source of DB truth)
 workers/       # Queue consumers that invoke src/services (audit pipeline)
 tests/         # Unit (services/utils), integration (API), e2e (Playwright)
 public/        # Logos, icons, static images, fonts
@@ -372,14 +370,14 @@ docs/          # PRD, Technical Architecture, ADRs
 - **Feature-first grouping:** components, services, and types cluster by domain (audit, billing, report) for easy navigation.
 - **Shared logic, two entry points:** `services/` is consumed by *both* API handlers and background `workers/`, avoiding duplication.
 - **Swap-friendly seams:** external providers (AI, storage, payments) live behind `lib/` adapters, so they can be replaced without touching business logic.
-- **Type safety everywhere:** shared `types/` + Prisma-generated types keep the frontend, API, and workers in sync.
+- **Type safety everywhere:** shared `types/` + Supabase-generated Database types keep the frontend, API, and workers in sync.
 - **`@/` path alias:** import from `@/services/...`, `@/lib/...` instead of brittle relative paths.
 
 ---
 
 ## 5. Database Schema
 
-PostgreSQL via Prisma. The schema is normalized around a central **User**, with **Membership** and **Credits** governing access/usage, **Audits → AuditIssues + Reports** capturing the core product output, and **Payments/Notifications/Settings** supporting billing and account management.
+PostgreSQL via Supabase. The schema is normalized around a central **User**, with **Membership** and **Credits** governing access/usage, **Audits → AuditIssues + Reports** capturing the core product output, and **Payments/Notifications/Settings** supporting billing and account management.
 
 ### 5.1 Entity-Relationship Overview
 
@@ -447,9 +445,11 @@ erDiagram
     }
 ```
 
-### 5.2 Prisma Schema
+### 5.2 Logical Schema
 
-```prisma
+> **Source of truth:** `supabase/migrations/`. The block below is a readable logical model (not an ORM schema).
+
+```text
 // ---------- Enums ----------
 enum Role {
   USER
@@ -1260,7 +1260,7 @@ Security follows **defense-in-depth**: multiple independent layers so no single 
 ### 11.3 API Protection
 - **HTTPS/TLS everywhere** — no plaintext transport; HSTS enabled.
 - **Input validation:** all request bodies/params validated with a schema (Zod) at the boundary → reject malformed input (400) before it reaches logic.
-- **Output encoding & ORM:** Prisma parameterizes queries (prevents SQL injection); React escapes output (prevents XSS).
+- **Output encoding & DB access:** Supabase/PostgREST and parameterized SQL/RPC prevent SQL injection; React escapes output (prevents XSS).
 - **Security headers:** `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`/frame-ancestors, `Referrer-Policy`, HSTS.
 - **CORS:** locked to Audient's own origins; no wildcard for authenticated endpoints.
 - **CSRF:** SameSite cookies + CSRF protection on state-changing form posts.
@@ -1356,7 +1356,7 @@ flowchart TB
     B -->|HTTPS| CDN --> APP
     B -->|auth| AUTH
     APP -->|verify JWT| AUTH
-    APP -->|SQL / Prisma| PG
+    APP -->|Supabase client / SQL| PG
     APP -->|signed URLs| SBS
     APP -->|enqueue| REDIS
     APP -->|checkout / portal| STRIPE
@@ -1409,13 +1409,13 @@ flowchart LR
     REV --> MERGE["Merge to main"]
     MERGE --> PROD["Vercel Production Deploy"]
     MERGE --> WDEP["Worker Deploy<br/>(Railway/Render)"]
-    MERGE --> MIG["Prisma migrate deploy<br/>(Supabase Postgres)"]
+    MERGE --> MIG["Supabase migrations<br/>(Postgres + RLS)"]
 ```
 
 - **GitHub Actions** runs lint, type-check, unit/integration tests, and build on every push/PR.
 - **Vercel Git integration** auto-deploys previews (PRs) and production (main).
 - **Workers** deploy from the same repo to the container host on merge.
-- **Database migrations:** `prisma migrate deploy` runs as a gated CI step against the target Supabase project (never auto-applied to prod without passing checks).
+- **Database migrations:** Supabase migrations run as a gated CI step against the target project (never auto-applied to prod without passing checks).
 
 ### 12.6 Configuration & Secrets
 - Secrets stored in **Vercel Environment Variables** (web/API) and the **worker host's secret store** — separated by environment.

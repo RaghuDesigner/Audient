@@ -32,7 +32,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### Environment Variables
 
-See `.env.example`. The core required values are the Supabase URL, anon key, and service-role key. Additional integrations (Stripe, Redis, AI provider, Prisma `DATABASE_URL`) are documented there for later sprints.
+See `.env.example`. The core required values are the Supabase URL, anon key, and service-role key. Additional integrations (Stripe, Redis, AI provider) are documented there for later sprints.
 
 ## Scripts
 
@@ -67,8 +67,7 @@ src/
 ├── utils/          # Pure, framework-agnostic helpers
 └── middleware.ts   # Supabase session refresh + route protection
 public/             # Static assets (brand/, icons, images)
-supabase/           # Migrations, edge functions, local config
-prisma/             # Prisma schema & migrations (later sprints)
+supabase/           # Migrations, edge functions, local config (schema source of truth)
 workers/            # Background audit pipeline workers
 tests/              # unit / integration / e2e
 ```
@@ -76,4 +75,3 @@ tests/              # unit / integration / e2e
 ## Documentation
 
 Product and engineering docs live in [`docs/`](./docs): PRD, technical architecture, database schema, API design, security, folder structure, component architecture, AI workflow, development roadmap, and the [engineering rules](./docs/CURSOR_RULES.md) all contributors follow.
-```

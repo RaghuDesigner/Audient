@@ -1,7 +1,7 @@
 /**
  * Shared domain types for Audient.
  * These mirror the database enums (see docs/TECHNICAL_ARCHITECTURE.md §5.2).
- * Generated Supabase/Prisma types can be re-exported from here as they land.
+ * Generated Supabase types can be re-exported from here as they land.
  */
 
 export type Role = "USER" | "ADMIN";

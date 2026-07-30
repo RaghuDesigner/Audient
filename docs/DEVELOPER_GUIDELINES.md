@@ -10,7 +10,7 @@
 
 **Format:** Markdown only — standards document, not application code.
 
-**Stack (authoritative for this guide):** Next.js 15 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v3 · shadcn/ui · Supabase (Auth / Postgres / Storage) · Prisma · PostgreSQL · Stripe · Zod · React Hook Form · Framer Motion · Lucide · BullMQ/Redis (workers) · Playwright (crawl/PDF) · Vercel (web) · GitHub Actions (CI).
+**Stack (authoritative for this guide):** Next.js 15 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v3 · shadcn/ui · Supabase (Auth / Postgres / Storage) · PostgreSQL · Stripe · Zod · React Hook Form · Framer Motion · Lucide · BullMQ/Redis (workers) · Playwright (crawl/PDF) · Vercel (web) · GitHub Actions (CI).
 
 **Product facts developers must not invent:** SSO = Google / Apple / Microsoft only · Plans = Free / Pro / Business (`ENTERPRISE` in schema) · Guest = 1 screenshot audit · Pricing = `docs/PRICING.md` + `src/config/plans.ts` · Figma screens = UI source of truth · Do not redesign screens.
 
@@ -33,13 +33,12 @@ audient/
 │   ├── components/          # ui/ + domain (audit, billing, report, …)
 │   ├── hooks/               # Client logic
 │   ├── services/            # Business logic (server)
-│   ├── lib/                 # Supabase, Stripe, AI, queue, Prisma client
+│   ├── lib/                 # Supabase, Stripe, AI, queue clients
 │   ├── types/               # Shared TS types
 │   ├── utils/               # Pure helpers
 │   ├── config/              # plans.ts, constants, feature flags
 │   ├── styles/              # Global CSS complements
 │   └── middleware.ts        # Auth / session gate
-├── prisma/                  # Schema + migrations
 ├── supabase/                # Migrations, RLS, config
 ├── workers/                 # Audit pipeline consumers
 ├── tests/                   # unit / integration / e2e
@@ -76,7 +75,7 @@ audient/
 | API routes | Next App Router folders | `app/api/audits/route.ts` |
 | Env vars | `SCREAMING_SNAKE` | `SUPABASE_SERVICE_ROLE_KEY` |
 | Public env | `NEXT_PUBLIC_*` only when browser needs it | `NEXT_PUBLIC_APP_URL` |
-| DB / Prisma | schema conventions in SCHEMA.md | `User`, `CreditTransaction` |
+| DB / Supabase | schema conventions in SCHEMA.md | `User`, `CreditTransaction` |
 | CSS tokens | Tailwind theme keys | `bg-primary`, `text-error` |
 | Test IDs | Align with `TEST_CASES.md` | `TC-AUTH-001` |
 | Analytics events | snake_case past tense | `audit_started` |
@@ -156,7 +155,7 @@ Do not duplicate business rules in the handler that already live in `services/`.
 
 | Kind | Approach |
 |------|----------|
-| Server truth | Postgres via Prisma/Supabase; credits & membership always server-authoritative |
+| Server truth | Postgres via Supabase; credits & membership always server-authoritative |
 | Auth session | Supabase SSR helpers (`lib/supabase/server`, `client`, middleware) |
 | UI ephemeral | React state / RHF; URL search params for shareable filters only when designed |
 | Async jobs | Audit `status` + progress from API/Realtime — do not invent fake fine-grained stages beyond API contract |
@@ -177,7 +176,7 @@ Source: `.env.example`. Copy to `.env.local` — **never commit secrets**.
 | `NEXT_PUBLIC_SUPABASE_URL` | Public | Supabase project |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public | Anon key only |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Server only** | Never `NEXT_PUBLIC_` |
-| `DATABASE_URL` | Server | Pooled Prisma URL |
+| `DATABASE_URL` | Server | Optional pooled Postgres URL (tooling/workers) |
 | `DIRECT_URL` | Server | Migrations |
 | `STRIPE_SECRET_KEY` | Server | Test/live by env |
 | `STRIPE_WEBHOOK_SECRET` | Server | Signature verify |
@@ -356,7 +355,7 @@ Checklist before requesting review:
 - [ ] Tokens only (no hardcoded hex)  
 - [ ] A11y considered  
 - [ ] Server-side gates for tier/credits  
-- [ ] Migrations included if schema changed (Prisma + Supabase RLS as needed)
+- [ ] Migrations included if schema changed (Supabase migrations (including RLS))
 
 Link related issues/docs. Prefer draft PRs for early feedback on architecture.
 
@@ -424,7 +423,7 @@ If a token is missing, add it to `tailwind.config.ts` / CSS variables first, the
 |------|--------|
 | Strict mode | Enabled; no implicit `any` |
 | Props / exports | Explicit types |
-| Shared types | `src/types` + Prisma generated types |
+| Shared types | `src/types` + Supabase generated types |
 | Validation | Zod schemas; infer types with `z.infer<>` |
 | Server-only modules | `import "server-only"` for admin/service-role code |
 | Exhaustiveness | Prefer `satisfies` / never checks on tier & status unions |
@@ -517,7 +516,7 @@ Rules:
 - No merge on failing CI.  
 - Cache dependencies responsibly.  
 - Do not print secrets in logs.  
-- Prisma: `prisma validate` / migrate diff checks when schema changes.  
+- Supabase: `supabase db lint` / migration diff checks when schema changes.  
 - Workers: separate build/test job when worker code changes.
 
 ---
@@ -529,7 +528,7 @@ Rules:
 | Web app | Vercel (or equivalent) from `main` |
 | Workers | Separate host (Railway/Render/Fly) — not serverless timeout-bound for full audits |
 | Envs | `preview` / `staging` / `production` with isolated Supabase + Stripe test vs live |
-| Migrations | Run Prisma / SQL migrations **before** or in controlled release; never break RLS |
+| Migrations | Run Supabase SQL migrations **before** or in controlled release; never break RLS |
 | Stripe | Webhook endpoint updated per env; test mode on staging |
 | Secrets | Platform secret store; rotate on personnel changes |
 | Health | Monitor `/api/health` + worker heartbeats |

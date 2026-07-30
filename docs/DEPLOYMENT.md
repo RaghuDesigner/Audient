@@ -9,7 +9,7 @@
 
 **Format:** Markdown only — operational specification, not application code.
 
-**Topology (summary):** Next.js on **Vercel** (web + API + Stripe webhooks) · **Supabase** (Auth, Postgres, Storage) · **Prisma** over Postgres · Audit **workers** on Railway/Render/Fly · **Upstash Redis** (BullMQ) · **Stripe** · LLM provider · Observability via Sentry + uptime/logs.
+**Topology (summary):** Next.js on **Vercel** (web + API + Stripe webhooks) · **Supabase** (Auth, Postgres, Storage) · Audit **workers** on Railway/Render/Fly · **Upstash Redis** (BullMQ) · **Stripe** · LLM provider · Observability via Sentry + uptime/logs.
 
 ---
 
@@ -74,7 +74,6 @@ Optional later: Playwright browsers for local worker testing, Redis locally (`RE
 | ESLint | Lint on save |
 | Prettier | Format (`prettier-plugin-tailwindcss`) |
 | Tailwind CSS IntelliSense | Class completion |
-| Prisma | Schema highlighting (when Prisma active) |
 | Playwright Test for VS Code | E2E (when suite exists) |
 | Error Lens (optional) | Inline diagnostics |
 | GitLens (optional) | Blame / history |
@@ -161,21 +160,21 @@ Prefer a shared cloud **dev** project if local Docker is unavailable.
 
 ## 5. Database Migration
 
-Audient uses **PostgreSQL** via Supabase with **Prisma** (schema in `prisma/`) and/or SQL in `supabase/migrations/` for RLS.
+Audient uses **PostgreSQL** via Supabase. Schema, RLS, and triggers live in `supabase/migrations/`.
 
 ### 5.1 Developer workflow
 
-1. Change `prisma/schema.prisma` (and RLS SQL as needed).  
-2. Create migration locally (`prisma migrate dev` / Supabase migration).  
+1. Change `supabase/migrations` (and RLS SQL as needed).  
+2. Create migration locally (`supabase migration up` / Supabase migration).  
 3. Review SQL for expand/contract safety (no reckless drops).  
 4. PR includes migration files + rollback notes.  
-5. CI validates schema (`prisma validate` when wired).
+5. CI validates migrations (`supabase db lint` when wired).
 
 ### 5.2 Deploy workflow
 
 ```text
 CI green → merge main →
-  1) prisma migrate deploy (against target DIRECT_URL)
+  1) supabase db push / migration up (target Supabase project)
   2) confirm RLS still enabled
   3) deploy Vercel web
   4) deploy workers (compatible with new schema)
@@ -230,7 +229,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 | Default branch | `main` (protected) |
 | Protection | Require PR, required CI checks, no force-push |
 | Secrets | GitHub Actions secrets for CI-only; app secrets in Vercel/worker stores |
-| CODEOWNERS (optional) | Require review on `prisma/`, `supabase/`, billing, auth |
+| CODEOWNERS (optional) | Require review on `supabase/`, billing, auth |
 
 Do not store production dumps or `.env` files in the repo.
 
@@ -272,7 +271,7 @@ Merge main → migrate deploy → Vercel Production → Worker deploy
 | Format | `npm run format:check` |
 | Unit tests | `npm test` (when present) |
 | Build | `npm run build` (with dummy/public env as needed) |
-| Prisma validate | when schema present |
+| Supabase migration lint | when migrations change |
 
 Optional: Playwright smoke on staging after deploy; axe on P0 routes.
 
@@ -317,7 +316,7 @@ Pause or scale-to-zero carefully during incident rollback.
 
 1. CI green on `main`.  
 2. Database backup / PITR confirmation.  
-3. `prisma migrate deploy` to **prod** `DIRECT_URL`.  
+3. Apply Supabase migrations to **prod** (CLI or CI).  
 4. Vercel promotes production deployment.  
 5. Workers roll out (compatible schema).  
 6. Verify Stripe live webhook delivery.  

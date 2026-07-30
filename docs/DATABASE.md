@@ -327,7 +327,7 @@ A review of the complete database with targeted improvements across five areas. 
 ### 9.4 Future Growth
 - **Design for multi-tenancy now, adopt later:** anticipate the **Organizations** model (agencies/Enterprise multi-seat) by keeping ownership logic centralized, so introducing an `organizationId` later is an additive migration rather than a rewrite.
 - **Soft-delete where history matters:** a `deletedAt` (soft-delete) pattern on key entities preserves history and enables recovery/undo, while hard-delete remains available for GDPR erasure.
-- **Schema versioning & migrations:** manage all changes through versioned migrations (Prisma Migrate) with an **expand/contract** approach for zero-downtime deploys.
+- **Schema versioning & migrations:** manage all changes through versioned migrations (Supabase migrations) with an **expand/contract** approach for zero-downtime deploys.
 - **Extensible enums vs. lookup tables:** enums (tiers, categories, severities) are clean but require a migration to change; for vocabularies expected to grow (e.g., audit categories as the rubric evolves), consider a **lookup table** for flexibility.
 - **Internationalization-ready:** currency is already stored per payment and locale per user — keep money as minor-unit integers with explicit currency to support multi-currency growth.
 - **Feature flags & config as data:** the recommended **Plans** table (and future config tables) let the product evolve pricing/features without deploys.
@@ -339,7 +339,7 @@ A review of the complete database with targeted improvements across five areas. 
 - **Realtime for live audit status (optional):** Supabase **Realtime** can push audit status changes to the client, replacing polling for the "processing → completed" UX — a natural fit since the data already lives in Postgres.
 - **Connect through the pooler for serverless:** use Supabase's pooled connection string for Vercel functions and workers to avoid exhausting Postgres connections.
 - **Respect Supabase's schema conventions:** keep application tables in the `public` schema, avoid modifying the `auth` schema directly, and reference the Supabase user id as the identity link (never store credentials).
-- **Migrations via Supabase-compatible tooling:** manage schema with Prisma Migrate (or Supabase migrations) and test against a dedicated Supabase branch/staging project before production.
+- **Migrations via Supabase-compatible tooling:** manage schema with Supabase migrations and test against a dedicated Supabase branch/staging project before production.
 
 ### 9.6 Summary of Highest-Impact Improvements
 | Area | Highest-impact change |

@@ -14,7 +14,7 @@ This document defines a scalable folder structure for the Audient codebase and e
 - **Feature-oriented + layered:** UI, business logic, and integrations are separated (`app/` → `services/` → `lib/`), while components/services cluster by domain (audit, billing, report).
 - **Thin routes, rich services:** route handlers and pages stay thin; business logic lives in `services/`, reused by both the API and background workers.
 - **Swappable integrations:** external providers (Supabase, Stripe, AI) live behind adapters in `lib/`.
-- **Type safety everywhere:** shared `types/` plus generated Supabase/Prisma types keep frontend, API, and workers in sync.
+- **Type safety everywhere:** shared `types/` plus generated Supabase types keep frontend, API, and workers in sync.
 - **Path alias:** import via `@/…` rather than brittle relative paths.
 
 ---
@@ -27,7 +27,6 @@ audient/
 ├── public/               # Static assets served as-is
 ├── docs/                 # Project documentation (PRD, architecture, this file)
 ├── supabase/             # Supabase local config, migrations, edge functions
-├── prisma/               # Prisma schema & migrations (if Prisma is used with Supabase Postgres)
 ├── workers/              # Background job workers (audit pipeline)
 ├── tests/                # Test suites (unit, integration, e2e)
 ├── scripts/              # One-off/maintenance & dev scripts
@@ -43,8 +42,7 @@ audient/
 - **`src/`** — All application code (keeps the repo root clean and tooling config separate from source).
 - **`public/`** — Static files (logos, icons, fonts, images, `favicon`) served directly at the site root.
 - **`docs/`** — All project documentation, including the PRD, technical architecture, database, API, and this structure.
-- **`supabase/`** — Supabase project configuration: local development setup, SQL migrations, database policies (RLS), and any Supabase Edge Functions.
-- **`prisma/`** — The Prisma schema and generated migrations, if Prisma is used as the ORM over Supabase's Postgres. (Single source of truth for the data model in code.)
+- **`supabase/`** — Supabase project configuration: local development setup, SQL migrations, RLS policies, Auth hooks/triggers, and Edge Functions. **Single source of truth** for the database schema.
 - **`workers/`** — Long-running background workers that process the audit queue (crawling, AI analysis, PDF generation) — separate from the web app because they exceed serverless time limits.
 - **`tests/`** — Automated tests organized by type.
 - **`scripts/`** — Developer and maintenance scripts (seeding, migrations helpers, one-off tasks).
@@ -127,7 +125,7 @@ Configured clients and adapters to external systems — the seam that keeps prov
 
 ```text
 src/lib/
-├── supabase/             # Supabase clients (browser, server, admin) & helpers
+├── supabase/             # Browser, server, and admin Supabase clients
 │   ├── client.ts         # Browser client
 │   ├── server.ts         # Server client (SSR / route handlers)
 │   └── admin.ts          # Service-role client (server-only)
@@ -137,8 +135,7 @@ src/lib/
 │   ├── index.ts          # Public interface (analyze())
 │   └── providers/        # Swappable model providers
 ├── queue.ts              # Job queue (BullMQ) definitions
-├── redis.ts              # Redis connection
-└── db.ts                 # Prisma client singleton (if used)
+└── redis.ts              # Redis connection
 ```
 - **`supabase/`** — Centralizes Supabase auth/db/storage clients: a browser client, a server client for SSR/route handlers, and a restricted service-role client for trusted server code only.
 - Other adapters (`stripe`, `ai`, `storage`, `queue`) isolate third-party SDKs so business logic stays decoupled and testable.
@@ -158,7 +155,7 @@ src/services/
 - Contains all rules (tier gating, credit logic, scoring). Route handlers and workers call these, never duplicating logic.
 
 ### `src/types/` — Shared Types
-Central TypeScript definitions used across the app: domain types (`Audit`, `Recommendation`, `Report`, `User`, `Tier`, `Credit`), API request/response shapes, and re-exported Supabase/Prisma generated types.
+Central TypeScript definitions used across the app: domain types (`Audit`, `Recommendation`, `Report`, `User`, `Tier`, `Credit`), API request/response shapes, and re-exported Supabase generated types.
 
 ### `src/utils/` — Pure Helpers
 Framework-agnostic, side-effect-free functions: formatting (dates, currency), scoring math, validation schemas (e.g., Zod), and small helpers. Easy to unit-test.
@@ -225,6 +222,6 @@ tests/
 - **A request** hits `src/app` (page or `api/` handler) → passes through `middleware.ts` for auth → the handler calls a **service** in `src/services` → which uses **adapters** in `src/lib` (Supabase, Stripe, AI, storage).
 - **UI** is composed from `src/components` (shadcn `ui/` primitives → domain components), using `src/hooks` for data and `src/config` for constants.
 - **Long audits** are enqueued by a service and executed in `workers/`, reusing the same `services/` and `lib/` — no duplicated logic.
-- **The database** is defined/migrated via `supabase/` (and `prisma/` if used), with types flowing into `src/types`.
+- **The database** is defined/migrated via `supabase/migrations`, with generated types flowing into `src/types`.
 
 This structure keeps the codebase **navigable, testable, and scalable** — new features add a route group, a few domain components, and a service, without disturbing existing code.

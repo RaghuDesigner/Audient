@@ -71,7 +71,7 @@ Maps roughly to `DEVELOPMENT_ROADMAP.md`: BM-01–03 ≈ Sprint 1 · BM-04–07 
 
 ### Goal
 
-Stand up the backend skeleton: env contracts, Prisma/Supabase clients, API envelope helpers, plan config, health check, and deployable empty route tree so later milestones plug into a consistent shape.
+Stand up the backend skeleton: env contracts, Supabase clients, API envelope helpers, plan config, health check, and deployable empty route tree so later milestones plug into a consistent shape.
 
 ### Files
 
@@ -144,7 +144,7 @@ Apply the full MVP schema with enums, FKs, indexes, CHECK constraints, RLS, auth
 
 | Area | Paths |
 |------|-------|
-| Prisma | `prisma/schema.prisma` · `prisma/migrations/*` |
+| Database | `supabase/migrations/*` |
 | Supabase | `supabase/migrations/*` (RLS, triggers) · `supabase/seed.sql` |
 | Lib | Wire `src/lib/db.ts` to migrated DB |
 
@@ -164,7 +164,7 @@ Apply the full MVP schema with enums, FKs, indexes, CHECK constraints, RLS, auth
 
 ### API
 
-None product-facing. Migration tooling only (`prisma migrate`, Supabase CLI).
+None product-facing. Migration tooling only (Supabase CLI).
 
 ### Authentication
 

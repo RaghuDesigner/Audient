@@ -6,9 +6,9 @@
 **Related:** `DATABASE.md` · `SCHEMA.md` · `PRICING.md` · `SECURITY.md` · `DEPLOYMENT.md` · `DEVELOPER_GUIDELINES.md` · `BUSINESS_RULES.md`
 
 **Audience:** Backend · Data · DevOps  
-**Format:** Markdown only — **no SQL / application code** in this document (describe migrations; implement via Prisma Migrate + `supabase/migrations` for RLS).
+**Format:** Markdown only — **no SQL / application code** in this document (describe migrations; implement via `supabase/migrations` (schema, RLS, triggers)).
 
-**Engine:** PostgreSQL (Supabase) · **ORM:** Prisma · **Auth bridge:** Supabase `auth.users` → app `Users`
+**Engine:** PostgreSQL (Supabase) · **Access:** Supabase client + SQL · **Auth bridge:** Supabase `auth.users` → app `Users`
 
 **Authoritative plan credits:** Free **300** / Pro **1,000** / Business (`ENTERPRISE`) **10,000** per `PRICING.md` (overrides older SCHEMA examples of Free 200).
 
@@ -31,7 +31,7 @@
 
 ## 2. Migration Order
 
-Apply in this **sequence**. Each step is one or more migration files (`prisma/migrations` and/or `supabase/migrations`).
+Apply in this **sequence**. Each step is one or more migration files (`supabase/migrations` and/or `supabase/migrations`).
 
 | Step | Migration | Contents |
 |------|-----------|----------|
@@ -60,7 +60,7 @@ Apply in this **sequence**. Each step is one or more migration files (`prisma/mi
 
 ```text
 1. Backup / PITR check (prod)
-2. prisma migrate deploy  (or supabase db push / migration up)
+2. supabase db push / migration up  (or supabase db push / migration up)
 3. Verify RLS enabled
 4. Deploy app + workers compatible with schema
 ```
@@ -257,7 +257,7 @@ For every table with `userId` (and Reports/Recommendations via join ownership):
 | **Preview/Staging** | Restore snapshot or reset project; re-migrate |
 | **Prod — additive migration** (new nullable col, new table) | Deploy app compatible with old+new; rollback **app** first if needed; leave DB forward |
 | **Prod — destructive** | Avoid; use expand/contract: add new → dual-write → backfill → switch reads → drop old in later migration |
-| **Failed migrate mid-way** | Prisma/Supabase transaction per migration file; fix forward with a new migration — do not edit applied migrations |
+| **Failed migrate mid-way** | Supabase transaction per migration file; fix forward with a new migration — do not edit applied migrations |
 | **Catastrophic** | Supabase **PITR** / daily backup restore to new instance; cut DNS after validation (`DEPLOYMENT.md`, DATABASE.md §7) |
 | **Workers mismatch** | Pause queue; roll back worker image with DB; never run old workers against dropped columns |
 
@@ -322,7 +322,7 @@ On first SSO:
 |------|----------|
 | Options | Local Supabase CLI **or** dedicated Supabase **dev** project |
 | Connection | `DATABASE_URL` pooled; `DIRECT_URL` for migrations |
-| Apply | `prisma migrate dev` / `supabase db reset` |
+| Apply | `supabase migration up` / `supabase db reset` |
 | RLS | Test with anon key **and** user JWT — prove isolation |
 | Stripe | Test mode only |
 | Data | Disposable; reset freely |
@@ -355,7 +355,7 @@ Staging mirrors prod schema; separate data and Stripe test keys.
 
 ### Before writing a migration
 
-- [ ] Schema change reflected in `SCHEMA.md` / Prisma schema  
+- [ ] Schema change reflected in `SCHEMA.md` / `supabase/migrations`  
 - [ ] FK order respected  
 - [ ] Enums/CHECKs defined  
 - [ ] Indexes for new query paths  
@@ -409,7 +409,7 @@ Staging mirrors prod schema; separate data and Stripe test keys.
 | `20260730000012_auth_trigger` | M16 |
 | `20260730000013_seed_plans` | M17 |
 
-Exact timestamps follow Prisma/Supabase tooling.
+Exact timestamps follow Supabase tooling.
 
 ---
 

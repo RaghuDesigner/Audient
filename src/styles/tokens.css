@@ -69,6 +69,19 @@
   --font-size-h2: 40px; /* Heading 2 */
   --font-size-h1: 48px; /* Heading 1 */
 
+  /*
+   * Extended type roles (derived) — reuse documented sizes only.
+   * Display = H1 size; H3–H6 = Body large → info with semibold.
+   */
+  --font-size-display: var(--font-size-h1);
+  --font-size-h3: var(--font-size-body-lg);
+  --font-size-h4: var(--font-size-body);
+  --font-size-h5: var(--font-size-body-sm);
+  --font-size-h6: var(--font-size-info);
+  --font-size-caption: var(--font-size-info);
+  --font-size-overline: var(--font-size-info);
+  --font-size-code: var(--font-size-body-sm);
+
   /* Line heights (derived — not in Figma sheet) */
   --line-height-none: 1;
   --line-height-tight: 1.2;

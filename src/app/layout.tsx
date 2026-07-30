@@ -1,5 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
+
+import { Toaster } from "@/components/ui/toast";
+import { ThemeProvider } from "@/providers/theme-provider";
+
 import "./globals.css";
 
 const fontSans = Manrope({
@@ -17,6 +21,13 @@ export const metadata: Metadata = {
     "Audient delivers expert-level, AI-powered UX audits for your website in minutes.",
 };
 
+/** Enables safe-area env() on notched devices. */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +39,12 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${fontSans.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col font-sans">{children}</body>
+      <body className="flex min-h-full flex-col font-sans">
+        <ThemeProvider defaultTheme="light" darkPaletteReady={false}>
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

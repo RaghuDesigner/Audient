@@ -153,6 +153,71 @@ const config: Config = {
             letterSpacing: "var(--letter-spacing-tighter)",
           },
         ],
+        // Derived roles — documented sizes only (see tokens.css)
+        display: [
+          "var(--font-size-display)",
+          {
+            lineHeight: "var(--line-height-tight)",
+            fontWeight: "var(--font-weight-bold)",
+            letterSpacing: "var(--letter-spacing-tighter)",
+          },
+        ],
+        h3: [
+          "var(--font-size-h3)",
+          {
+            lineHeight: "var(--line-height-snug)",
+            fontWeight: "var(--font-weight-semibold)",
+            letterSpacing: "var(--letter-spacing-tight)",
+          },
+        ],
+        h4: [
+          "var(--font-size-h4)",
+          {
+            lineHeight: "var(--line-height-normal)",
+            fontWeight: "var(--font-weight-semibold)",
+            letterSpacing: "var(--letter-spacing-normal)",
+          },
+        ],
+        h5: [
+          "var(--font-size-h5)",
+          {
+            lineHeight: "var(--line-height-normal)",
+            fontWeight: "var(--font-weight-semibold)",
+            letterSpacing: "var(--letter-spacing-normal)",
+          },
+        ],
+        h6: [
+          "var(--font-size-h6)",
+          {
+            lineHeight: "var(--line-height-normal)",
+            fontWeight: "var(--font-weight-semibold)",
+            letterSpacing: "var(--letter-spacing-wide)",
+          },
+        ],
+        caption: [
+          "var(--font-size-caption)",
+          {
+            lineHeight: "var(--line-height-normal)",
+            fontWeight: "var(--font-weight-regular)",
+            letterSpacing: "var(--letter-spacing-normal)",
+          },
+        ],
+        overline: [
+          "var(--font-size-overline)",
+          {
+            lineHeight: "var(--line-height-normal)",
+            fontWeight: "var(--font-weight-semibold)",
+            letterSpacing: "var(--letter-spacing-wide)",
+          },
+        ],
+        code: [
+          "var(--font-size-code)",
+          {
+            lineHeight: "var(--line-height-normal)",
+            fontWeight: "var(--font-weight-regular)",
+            letterSpacing: "var(--letter-spacing-normal)",
+          },
+        ],
       },
 
       lineHeight: {
@@ -252,6 +317,14 @@ const config: Config = {
           from: { opacity: "0", transform: "scale(0.96)" },
           to: { opacity: "1", transform: "scale(1)" },
         },
+        shimmer: {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
+        "progress-indeterminate": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(200%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -259,6 +332,9 @@ const config: Config = {
         "fade-in": "fade-in 0.2s ease-out",
         "slide-up": "slide-in-up 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         "scale-in": "scale-in 0.15s ease-out",
+        shimmer: "shimmer 1.6s linear infinite",
+        "progress-indeterminate":
+          "progress-indeterminate 1.2s ease-in-out infinite",
       },
     },
   },

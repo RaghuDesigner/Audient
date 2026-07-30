@@ -111,7 +111,7 @@ Canonical catalog: **`.env.example`**. Production values live in Vercel + worker
 ## 5. Database
 
 □ Prod Postgres = **audient-prod** Supabase (isolated from staging)  
-□ All migrations applied via `prisma migrate deploy` / approved pipeline (**not** laptop ad-hoc)  
+□ All migrations applied via `supabase db push / migration up` / approved pipeline (**not** laptop ad-hoc)  
 □ Pre-migrate **PITR / backup** confirmed  
 □ Enums, FKs, CHECKs match `DATABASE_MIGRATION.md` / `SCHEMA.md`  
 □ Indexes present for history, worker pickup, ledger  
