@@ -241,6 +241,7 @@ const config: Config = {
         sm: "var(--spacing-sm)",
         md: "var(--spacing-md)",
         lg: "var(--spacing-lg)",
+        "upload-tile": "var(--size-upload-tile)",
       },
 
       // ------------------------------------------------------ Border radius
@@ -258,6 +259,11 @@ const config: Config = {
         sm: "var(--shadow-sm)",
         md: "var(--shadow-md)",
         lg: "var(--shadow-lg)",
+      },
+
+      // ---------------------------------------------------------- Gradients
+      backgroundImage: {
+        "brand-upload": "var(--gradient-brand-upload)",
       },
 
       // ------------------------------------------------------------ Opacity

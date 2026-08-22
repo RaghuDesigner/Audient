@@ -102,6 +102,9 @@
   --spacing-md: 16px;
   --spacing-lg: 24px;
 
+  /* Screen1 upload tile (Assets/Image_Upload.svg viewBox) */
+  --size-upload-tile: 120px;
+
   /* ===================================================== Border radius
    * Documented: Small 4 / Medium 8 / Large 16
    */
@@ -117,6 +120,15 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* ========================================================== Gradients
+   * Derived from Primary + Secondary (Screen1 upload tile)
+   */
+  --gradient-brand-upload: linear-gradient(
+    165deg,
+    rgb(var(--secondary)) 0%,
+    rgb(var(--primary)) 100%
+  );
 
   /* =========================================================== Opacity
    * Derived scale for disabled / overlays / media

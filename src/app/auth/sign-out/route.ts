@@ -1,0 +1,41 @@
+import { NextResponse, type NextRequest } from "next/server";
+
+import { AUTH_ROUTES, MOCK_AUTH_COOKIE } from "@/config/auth";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { readSupabasePublicEnv } from "@/lib/supabase/env";
+
+/**
+ * Sign out — clears Supabase session cookies (when configured) and mock cookie.
+ * Prefer POST from UI; GET supported for simple links.
+ */
+async function signOutAndRedirect(request: NextRequest) {
+  const env = readSupabasePublicEnv();
+  if (env.ok) {
+    try {
+      const supabase = await createSupabaseServerClient();
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("[auth/sign-out] Supabase signOut failed", error);
+    }
+  }
+
+  const response = NextResponse.redirect(
+    new URL(AUTH_ROUTES.afterLogout, request.url),
+    { status: 303 },
+  );
+
+  response.cookies.set(MOCK_AUTH_COOKIE.name, "", {
+    path: "/",
+    maxAge: 0,
+  });
+
+  return response;
+}
+
+export async function POST(request: NextRequest) {
+  return signOutAndRedirect(request);
+}
+
+export async function GET(request: NextRequest) {
+  return signOutAndRedirect(request);
+}

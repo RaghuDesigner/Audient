@@ -33,6 +33,8 @@ export interface ProgressProps
   label?: string;
   /** Optional visible percentage (not color-only). */
   showValue?: boolean;
+  /** Token fill override (e.g. `bg-warning` / `bg-error`). */
+  indicatorClassName?: string;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -46,6 +48,7 @@ function Progress({
   size,
   label = "Progress",
   showValue = false,
+  indicatorClassName,
   ...props
 }: ProgressProps) {
   const safeMax = max > 0 ? max : 100;
@@ -70,7 +73,10 @@ function Progress({
         className={cn(progressTrackVariants({ size }))}
       >
         <div
-          className="h-full rounded-full bg-primary transition-[width] duration-slow ease-in-out-smooth motion-reduce:transition-none"
+          className={cn(
+            "h-full rounded-full bg-primary transition-[width] duration-slow ease-in-out-smooth motion-reduce:transition-none",
+            indicatorClassName,
+          )}
           style={{ width: `${percent}%` }}
         />
       </div>

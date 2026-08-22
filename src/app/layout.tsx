@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
+import { Suspense } from "react";
 
+import { SystemStatusBannerShell } from "@/components/system/SystemStatusBannerShell";
 import { Toaster } from "@/components/ui/toast";
+import { AuthProvider } from "@/providers/auth-provider";
+import { AccountProvider } from "@/providers/account-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 import "./globals.css";
@@ -41,8 +45,15 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col font-sans">
         <ThemeProvider defaultTheme="light" darkPaletteReady={false}>
-          {children}
-          <Toaster />
+          <AuthProvider>
+            <AccountProvider>
+              <Suspense fallback={null}>
+                <SystemStatusBannerShell />
+              </Suspense>
+              {children}
+              <Toaster />
+            </AccountProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
