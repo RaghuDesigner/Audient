@@ -78,8 +78,12 @@ export async function GET(request: NextRequest) {
     if (provision.membershipTier && provision.membershipTier !== "FREE") {
       // Existing returning users may already be PRO/ENTERPRISE — allow.
     }
-
-    return NextResponse.redirect(new URL(next, origin));
+    const publicOrigin =
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    process.env.APP_URL?.trim() ||
+    origin;
+  
+  return NextResponse.redirect(new URL(next, publicOrigin));
   } catch (error) {
     console.error("[auth/callback] unexpected failure", error);
     return redirectSignIn(origin, AUTH_CALLBACK_ERROR.failed);
