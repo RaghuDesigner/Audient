@@ -19,10 +19,15 @@ async function signOutAndRedirect(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.redirect(
-    new URL(AUTH_ROUTES.afterLogout, request.url),
-    { status: 303 },
-  );
+  const publicOrigin =
+  process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+  process.env.APP_URL?.trim() ||
+  new URL(request.url).origin;
+
+const response = NextResponse.redirect(
+  new URL(AUTH_ROUTES.afterLogout, publicOrigin),
+  { status: 303 },
+);
 
   response.cookies.set(MOCK_AUTH_COOKIE.name, "", {
     path: "/",
