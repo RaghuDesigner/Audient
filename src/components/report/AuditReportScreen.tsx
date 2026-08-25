@@ -93,19 +93,29 @@ export function AuditReportScreen({
   const preview = view?.kind === "preview";
 
   React.useEffect(() => {
+    // Clear previous report immediately when navigating to a new audit.
+    setApiReport(null);
+    viewed.current = false;
+
     if (!isRealAuditId(auditId) || state !== "completed" || isEmpty) {
-      setApiReport(null);
       return;
     }
+
     let cancelled = false;
+
     void (async () => {
       try {
         const report = await fetchAuditReportFoundation(auditId);
-        if (!cancelled) setApiReport(report);
+        if (!cancelled) {
+          setApiReport(report);
+        }
       } catch {
-        if (!cancelled) setApiReport(null);
+        if (!cancelled) {
+          setApiReport(null);
+        }
       }
     })();
+
     return () => {
       cancelled = true;
     };
