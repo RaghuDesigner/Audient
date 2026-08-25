@@ -131,7 +131,14 @@ export function BillingPaymentsContent({
           coupon={coupon}
           loading={loading}
         />
+       
         {!loading ? (
+          <BodySmall className="sr-only" role="status" aria-live="polite">
+            {`${BILLING_PAYMENTS_COPY.total}: ${order.totalDueCents}`}
+          </BodySmall>
+        ) : null}
+      </aside>
+      {!loading ? (
           <div className="flex flex-col-reverse gap-sm sm:flex-row sm:justify-end">
             <Button
               type="button"
@@ -155,12 +162,6 @@ export function BillingPaymentsContent({
             </Button>
           </div>
         ) : null}
-        {!loading ? (
-          <BodySmall className="sr-only" role="status" aria-live="polite">
-            {`${BILLING_PAYMENTS_COPY.total}: ${order.totalDueCents}`}
-          </BodySmall>
-        ) : null}
-      </aside>
     </div>
   );
 }
