@@ -68,6 +68,7 @@ export function AuditReportScreen({
   const [shareOpen, setShareOpen] = React.useState(false);
   const [apiReport, setApiReport] =
     React.useState<AuditReportFoundation | null>(null);
+    const [apiReportLoading, setApiReportLoading] = React.useState(false);
 
   const tier =
     tierProp ??
@@ -93,25 +94,29 @@ export function AuditReportScreen({
   const preview = view?.kind === "preview";
 
   React.useEffect(() => {
-    // Clear previous report immediately when navigating to a new audit.
     setApiReport(null);
     viewed.current = false;
 
     if (!isRealAuditId(auditId) || state !== "completed" || isEmpty) {
+      setApiReportLoading(false);
       return;
     }
 
+    setApiReportLoading(true);
     let cancelled = false;
 
     void (async () => {
       try {
         const report = await fetchAuditReportFoundation(auditId);
+
         if (!cancelled) {
           setApiReport(report);
+          setApiReportLoading(false);
         }
       } catch {
         if (!cancelled) {
           setApiReport(null);
+          setApiReportLoading(false);
         }
       }
     })();
@@ -190,7 +195,19 @@ export function AuditReportScreen({
       </Shell>
     );
   }
-
+  if (apiReportLoading) {
+    return (
+      <Shell header={header}>
+        <Skeleton className="h-40 w-full rounded-md" />
+        <Skeleton className="h-48 w-full rounded-md" />
+        <div className="grid gap-md sm:grid-cols-2 lg:grid-cols-3">
+          <Skeleton className="h-28 rounded-md" />
+          <Skeleton className="h-28 rounded-md" />
+          <Skeleton className="h-28 rounded-md" />
+        </div>
+      </Shell>
+    );
+  }
   if (isEmpty || !data) {
     return (
       <Shell header={header} center>
