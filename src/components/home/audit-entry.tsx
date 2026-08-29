@@ -104,10 +104,12 @@ export function AuditEntry({ className }: { className?: string }) {
     planTier,
   );
   const urlAllowed =
-    accountCtx?.account != null
+    !isGuest &&
+    !authLoading &&
+    (accountCtx?.account != null
       ? accountCtx.account.limits.urlAuditsEnabled &&
         accountCtx.account.membershipStatus !== "cancelled"
-      : canAccessUrlInput(membership);
+      : canAccessUrlInput(membership));
   const idlePickerRef = React.useRef<(() => void) | null>(null);
   const replaceInputRef = React.useRef<HTMLInputElement>(null);
   const urlInputFocusRef = React.useRef(false);
@@ -127,6 +129,25 @@ export function AuditEntry({ className }: { className?: string }) {
       focusTier: "PRO",
     });
   }, [openUpgrade]);
+
+  const handleUrlProtectedAction = React.useCallback(
+    (urlDraft = "") => {
+      if (isGuest || membership === "GUEST") {
+        openLogin({
+          source: "url_gate",
+          nextPath: "/",
+          intent: {
+            type: "url_audit",
+            payload: urlDraft,
+          },
+        });
+        return;
+      }
+
+      openPlansModal();
+    },
+    [isGuest, membership, openLogin, openPlansModal],
+  );
 
   const previewUrl =
     state.mode === "image_success" ? state.previewUrl : null;
@@ -198,7 +219,7 @@ export function AuditEntry({ className }: { className?: string }) {
 
   const handleUrlSubmit = (raw: string) => {
     if (!urlAllowed) {
-      openPlansModal();
+      handleUrlProtectedAction(raw);
       return;
     }
 
@@ -425,7 +446,7 @@ export function AuditEntry({ className }: { className?: string }) {
           value={state.urlDraft}
           gated={!urlAllowed}
           disabled={retrying}
-          onProtectedAction={openPlansModal}
+          onProtectedAction={() => handleUrlProtectedAction(state.urlDraft)}
           onChange={(value) => {
             // Clear failure treatment on edit; retain typed URL.
             setState({ mode: "url_editing", urlDraft: value });
@@ -475,7 +496,7 @@ export function AuditEntry({ className }: { className?: string }) {
           state.mode === "url_editing" &&
           urlInputFocusRef.current
         }
-        onProtectedAction={openPlansModal}
+        onProtectedAction={handleUrlProtectedAction}
         onChange={(value) => {
           urlInputFocusRef.current = false;
           setState({ mode: "idle", urlDraft: value });
