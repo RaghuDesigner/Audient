@@ -4,6 +4,7 @@ import { CreditsBadge } from "@/components/home/credits-badge";
 import { Logo } from "@/components/home/logo";
 import { Button } from "@/components/ui/button";
 import { GuestProfileDropdown } from "@/components/profile/GuestProfileDropdown";
+import { useAuthenticatedHeaderCredits } from "@/hooks/use-mock-membership-state";
 import { useUpgradePlansModalOptional } from "@/providers/upgrade-plans-modal-provider";
 import { cn } from "@/utils/cn";
 
@@ -17,6 +18,7 @@ export type HeaderProps = {
  */
 export function Header({ className }: HeaderProps) {
   const upgradeModal = useUpgradePlansModalOptional();
+  const authenticatedCredits = useAuthenticatedHeaderCredits();
 
   return (
     <header
@@ -50,7 +52,7 @@ export function Header({ className }: HeaderProps) {
               Pricing
             </Button>
           ) : null}
-          <CreditsBadge value={100} />
+          <CreditsBadge value={authenticatedCredits ?? 0} />
           <GuestProfileDropdown />
         </div>
       </div>
