@@ -92,7 +92,10 @@ export const AUDIT_FAILURE_CATALOG: Record<
     description:
       "We couldn’t read this image. Use a clear PNG, JPG, JPEG, or WEBP.",
     retryAllowed: true,
-    refundEligible: false,
+    // Create-time invalid uploads are 400 before credit deduction, so they
+    // never reach failAudit. Processor-time SCREENSHOT_INVALID (missing or
+    // unreadable stored evidence) refunds so lost-job failures are not charged.
+    refundEligible: true,
   },
   PAGE_TOO_HEAVY: {
     code: "PAGE_TOO_HEAVY",

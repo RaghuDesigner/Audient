@@ -4,9 +4,10 @@ import { AuthRequiredError } from "@/lib/auth/session";
 import { auditErrorResponse } from "@/lib/audits/http";
 import { checkRateLimit, RateLimitError } from "@/lib/rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createAuditForUser } from "@/services/audit/create";
+import { createAuditForUser, failAudit } from "@/services/audit/create";
 import { listAuditsForUser } from "@/services/audit/queries";
 import { scheduleAiAuditProcessor } from "@/services/audit/ai-processor";
+import { persistScreenshotEvidence } from "@/services/audit/persist-screenshot";
 import {
   AccountMissingError,
   AuthorizationError,
@@ -156,6 +157,50 @@ export async function POST(request: Request) {
       workspaceId: body.workspaceId ?? null,
       simulateFailure: body.simulateFailure === true,
     });
+
+    if (inputType === "SCREENSHOT") {
+      const canReuseAsset = Boolean(result.audit.primaryAssetId);
+      if (!canReuseAsset && !imageDataUrl) {
+        await failAudit(supabase, {
+          auditId: result.audit.id,
+          appUserId: account.appUserId,
+          code: "INTERNAL_ERROR",
+          message: "Unable to store screenshot for analysis.",
+        });
+        return NextResponse.json(
+          {
+            error: "Unable to store screenshot for analysis.",
+            code: "INTERNAL_ERROR",
+          },
+          { status: 500, headers: { "Cache-Control": "no-store" } },
+        );
+      }
+
+      if (!canReuseAsset && imageDataUrl) {
+        try {
+          await persistScreenshotEvidence({
+            supabase,
+            appUserId: account.appUserId,
+            auditId: result.audit.id,
+            imageDataUrl,
+          });
+        } catch {
+          await failAudit(supabase, {
+            auditId: result.audit.id,
+            appUserId: account.appUserId,
+            code: "INTERNAL_ERROR",
+            message: "Unable to store screenshot for analysis.",
+          });
+          return NextResponse.json(
+            {
+              error: "Unable to store screenshot for analysis.",
+              code: "INTERNAL_ERROR",
+            },
+            { status: 500, headers: { "Cache-Control": "no-store" } },
+          );
+        }
+      }
+    }
 
     scheduleAiAuditProcessor(supabase, result.audit.id, { imageDataUrl });
 

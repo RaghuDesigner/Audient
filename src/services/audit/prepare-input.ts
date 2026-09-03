@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { AuditRecord } from "@/types/audit";
 import { fetchUrlAuditEvidence } from "@/services/audit/fetch-url-evidence";
+import { AUDIT_UPLOADS_BUCKET } from "@/services/audit/persist-screenshot";
 
 export type PreparedAuditInput = {
   pageTextExcerpt: string | null;
@@ -21,7 +22,7 @@ function isValidImageDataUrl(value: string | null | undefined): value is string 
 
 /**
  * Prepare evidence for the AI engine from an owned audit row.
- * Transient `imageDataUrl` covers screenshot audits before Storage upload exists.
+ * Fast path: transient `imageDataUrl`. Durable path: `primary_asset_id` signed URL.
  */
 export async function prepareAuditAiInput(
   supabase: SupabaseClient,
@@ -55,13 +56,13 @@ export async function prepareAuditAiInput(
       try {
         const admin = createSupabaseAdminClient();
         const { data: signed, error } = await admin.storage
-          .from("audit-uploads")
+          .from(AUDIT_UPLOADS_BUCKET)
           .createSignedUrl(asset.storage_key as string, 60 * 10);
         if (!error && signed?.signedUrl) {
           imageUrl = signed.signedUrl;
         }
       } catch {
-        // Storage optional until upload pipeline ships
+        // Signed URL unavailable — screenshot audits fail closed below.
       }
     }
   }

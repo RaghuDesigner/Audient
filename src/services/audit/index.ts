@@ -4,6 +4,7 @@ export { createAuditForUser, claimAudit, completeAudit, failAudit } from "@/serv
 export { getAuditForUser, listAuditsForUser } from "@/services/audit/queries";
 export { retryFailedAudit } from "@/services/audit/retry";
 export { scheduleAuditLifecycleStub, runAuditLifecycleStub } from "@/services/audit/stub-processor";
+export { persistScreenshotEvidence } from "@/services/audit/persist-screenshot";
 export {
   scheduleAiAuditProcessor,
   runAiAuditProcessor,
