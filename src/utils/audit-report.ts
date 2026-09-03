@@ -54,6 +54,53 @@ export function auditReportTierLimits(tier: AuditReportTier) {
   return AUDIT_REPORT_TIER_LIMITS[tier];
 }
 
+/** Slice a real report payload to tier visibility limits (no mock content). */
+export function applyAuditReportTierLimits(
+  data: MockAuditReportFull,
+  tier: AuditReportTier,
+): MockAuditReportFull {
+  const limits = AUDIT_REPORT_TIER_LIMITS[tier];
+  const findingsLimit =
+    limits.findings === "all" ? data.findings.length : limits.findings;
+  const recommendationsLimit =
+    limits.recommendations === "all"
+      ? data.recommendations.length
+      : limits.recommendations;
+  const strengthsLimit =
+    limits.strengths === "all" ? data.strengths.length : limits.strengths;
+
+  return {
+    ...data,
+    findings: data.findings.slice(0, findingsLimit),
+    recommendations: data.recommendations.slice(0, recommendationsLimit),
+    strengths: data.strengths.slice(0, strengthsLimit),
+    totals: data.totals,
+  };
+}
+
+/** Locked teaser counts from full totals vs tier limits. */
+export function lockedCountsForAuditReportTier(
+  data: MockAuditReportFull | null,
+  tier: AuditReportTier,
+): { findings: number; recommendations: number; strengths: number } {
+  if (!data) return { findings: 0, recommendations: 0, strengths: 0 };
+  const limits = AUDIT_REPORT_TIER_LIMITS[tier];
+  return {
+    findings:
+      limits.findings === "all"
+        ? 0
+        : Math.max(0, data.totals.findings - limits.findings),
+    recommendations:
+      limits.recommendations === "all"
+        ? 0
+        : Math.max(0, data.totals.recommendations - limits.recommendations),
+    strengths:
+      limits.strengths === "all"
+        ? 0
+        : Math.max(0, data.totals.strengths - limits.strengths),
+  };
+}
+
 /** Whether a recommendation index (0-based) is expandable for the tier. */
 export function canExpandAuditRecommendation(
   tier: AuditReportTier,

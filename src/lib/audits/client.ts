@@ -89,6 +89,23 @@ export async function retryAuditRequest(
   return (await response.json()) as CreateAuditClientResult;
 }
 
+export class AuditReportFetchError extends Error {
+  readonly code: string;
+  readonly status: number;
+  readonly auditStatus: string | null;
+
+  constructor(
+    message: string,
+    options: { code: string; status: number; auditStatus?: string | null },
+  ) {
+    super(message);
+    this.name = "AuditReportFetchError";
+    this.code = options.code;
+    this.status = options.status;
+    this.auditStatus = options.auditStatus ?? null;
+  }
+}
+
 export async function fetchAuditReportFoundation(
   auditId: string,
 ): Promise<AuditReportFoundation> {
@@ -101,7 +118,26 @@ export async function fetchAuditReportFoundation(
     },
   );
   if (!response.ok) {
-    throw new Error(await readError(response));
+    let code = "REPORT_FETCH_FAILED";
+    let message = response.statusText || "Request failed";
+    let auditStatus: string | null = null;
+    try {
+      const body = (await response.json()) as {
+        error?: string;
+        code?: string;
+        status?: string;
+      };
+      code = body.code ?? code;
+      message = body.error ?? body.code ?? message;
+      auditStatus = typeof body.status === "string" ? body.status : null;
+    } catch {
+      /* keep defaults */
+    }
+    throw new AuditReportFetchError(message, {
+      code,
+      status: response.status,
+      auditStatus,
+    });
   }
   const body = (await response.json()) as { report: AuditReportFoundation };
   return body.report;

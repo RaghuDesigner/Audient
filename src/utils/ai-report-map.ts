@@ -90,33 +90,15 @@ function mapUiCategoryScores(
 }
 
 /**
- * Overlay API AI report onto the existing report layout model.
- * Returns null when the report is still a placeholder (use mock shell only).
+ * Overlay API AI report onto a layout shell.
+ * Returns null for placeholder reports — never merge placeholder with mock findings.
  */
 export function overlayAuditReportFromFoundation(
   base: MockAuditReportFull,
   report: AuditReportFoundation,
 ): MockAuditReportFull | null {
   if (report.placeholder) {
-    return {
-      ...base,
-      auditId: report.auditId,
-      overall: {
-        ...base.overall,
-        ...(typeof report.overallScore === "number"
-          ? { score: report.overallScore }
-          : {}),
-        ...(report.aiSummary ? { summary: report.aiSummary } : {}),
-        auditType: toOverallAuditType(report.inputType),
-      },
-      summary: {
-        ...base.summary,
-        websiteUrl: report.websiteUrl ?? base.summary.websiteUrl,
-        auditType: toSummaryAuditType(report.inputType),
-        auditDate: report.completedAt ?? report.createdAt,
-        blurb: report.aiSummary ?? base.summary.blurb,
-      },
-    };
+    return null;
   }
 
   const findings: MockFinding[] = report.findings.map((f, index) => ({
@@ -202,7 +184,7 @@ export function overlayAuditReportFromFoundation(
     },
     overall: {
       score: report.overallScore ?? 0,
-      summary: report.aiSummary ?? base.overall.summary,
+      summary: report.aiSummary ?? "",
       lastUpdated: report.completedAt ?? report.createdAt,
       auditType: toOverallAuditType(report.inputType),
     },
@@ -216,4 +198,51 @@ export function overlayAuditReportFromFoundation(
       strengths: 0,
     },
   };
+}
+
+/**
+ * Build a user-visible report solely from real API foundation data.
+ * Returns null for placeholder / incomplete payloads — never invents findings.
+ */
+export function buildAuditReportFromFoundation(
+  report: AuditReportFoundation,
+  planUsed: MockAuditReportFull["summary"]["planUsed"] = "pro",
+): MockAuditReportFull | null {
+  if (report.placeholder) return null;
+
+  let websiteName = "Audit";
+  if (report.websiteUrl) {
+    try {
+      websiteName = new URL(report.websiteUrl).hostname;
+    } catch {
+      websiteName = report.websiteUrl;
+    }
+  } else if (report.inputType === "SCREENSHOT") {
+    websiteName = "Screenshot audit";
+  }
+
+  const shell: MockAuditReportFull = {
+    auditId: report.auditId,
+    summary: {
+      websiteName,
+      websiteUrl: report.websiteUrl,
+      auditDate: report.completedAt ?? report.createdAt,
+      auditType: toSummaryAuditType(report.inputType),
+      planUsed,
+      blurb: report.aiSummary ?? "",
+    },
+    overall: {
+      score: report.overallScore ?? 0,
+      summary: report.aiSummary ?? "",
+      lastUpdated: report.completedAt ?? report.createdAt,
+      auditType: toOverallAuditType(report.inputType),
+    },
+    categories: [],
+    findings: [],
+    strengths: [],
+    recommendations: [],
+    totals: { findings: 0, recommendations: 0, strengths: 0 },
+  };
+
+  return overlayAuditReportFromFoundation(shell, report);
 }
