@@ -188,6 +188,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         options: {
           redirectTo: redirectTo.toString(),
           skipBrowserRedirect: false,
+          ...(provider === "google"
+            ? { queryParams: { prompt: "select_account" } }
+            : {}),
         },
       });
 
