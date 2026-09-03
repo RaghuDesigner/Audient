@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { LogoutConfirmDialog } from "@/components/auth/LogoutConfirmDialog";
 import { Avatar } from "@/components/home/avatar";
 import { DisabledMenuItem } from "@/components/profile/DisabledMenuItem";
 import { MenuItem } from "@/components/profile/MenuItem";
@@ -40,6 +41,7 @@ export function GuestProfileDropdown({
   const { openLogin } = useLoginModalControls();
 
   const [open, setOpen] = React.useState(false);
+  const [logoutOpen, setLogoutOpen] = React.useState(false);
   const rootRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const loginRef = React.useRef<HTMLButtonElement>(null);
@@ -81,10 +83,15 @@ export function GuestProfileDropdown({
     openLogin({ source: "guest_menu", nextPath: "/dashboard" });
   }, [close, openLogin]);
 
-  const handleLogout = React.useCallback(async () => {
+  const handleLogoutRequest = React.useCallback(() => {
     close("logout", false);
+    setLogoutOpen(true);
+  }, [close]);
+
+  const handleLogoutConfirm = React.useCallback(async () => {
+    setLogoutOpen(false);
     await signOut();
-  }, [close, signOut]);
+  }, [signOut]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -194,7 +201,7 @@ export function GuestProfileDropdown({
               <div className="my-sm border-t border-border" />
 
               <MenuItem
-                onSelect={() => void handleLogout()}
+                onSelect={handleLogoutRequest}
                 className="text-error"
               >
                 Log out
@@ -213,6 +220,12 @@ export function GuestProfileDropdown({
           )}
         </div>
       ) : null}
+
+      <LogoutConfirmDialog
+        open={logoutOpen}
+        onOpenChange={setLogoutOpen}
+        onConfirm={() => void handleLogoutConfirm()}
+      />
     </div>
   );
 }

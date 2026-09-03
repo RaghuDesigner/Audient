@@ -4,6 +4,7 @@ import Link from "next/link";
 import * as React from "react";
 
 import { LoginModal } from "@/components/auth/LoginModal";
+import { LogoutConfirmDialog } from "@/components/auth/LogoutConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { BodyMedium, Caption, H1 } from "@/components/ui/typography";
 import { AUTH_ROUTES } from "@/config/auth";
@@ -16,6 +17,7 @@ import { useAuth } from "@/hooks/use-auth";
 export function HomeAuthPanel() {
   const { user, isGuest, isLoading, isAuthenticated, signOut } = useAuth();
   const [loginOpen, setLoginOpen] = React.useState(false);
+  const [logoutOpen, setLogoutOpen] = React.useState(false);
 
   if (isLoading) {
     return (
@@ -38,11 +40,19 @@ export function HomeAuthPanel() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => void signOut()}
+            onClick={() => setLogoutOpen(true)}
           >
             Log out
           </Button>
         </div>
+        <LogoutConfirmDialog
+          open={logoutOpen}
+          onOpenChange={setLogoutOpen}
+          onConfirm={() => {
+            setLogoutOpen(false);
+            void signOut();
+          }}
+        />
       </div>
     );
   }

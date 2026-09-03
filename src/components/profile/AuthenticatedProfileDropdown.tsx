@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Crown } from "lucide-react";
 
+import { LogoutConfirmDialog } from "@/components/auth/LogoutConfirmDialog";
 import { Avatar } from "@/components/home/avatar";
 import { MenuItem } from "@/components/profile/MenuItem";
 import {
@@ -48,6 +49,7 @@ export function AuthenticatedProfileDropdown({
   const router = useRouter();
   const { handleProfileAction } = useProfileNavigation(profileNavigation);
   const [open, setOpen] = React.useState(false);
+  const [logoutOpen, setLogoutOpen] = React.useState(false);
   const rootRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const itemRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
@@ -86,12 +88,13 @@ export function AuthenticatedProfileDropdown({
     (action: AuthenticatedProfileAction, href: string) => {
       close(false);
 
-      const allowed = handleProfileAction(action);
-      if (allowed === false) {
+      if (action === "logout") {
+        setLogoutOpen(true);
         return;
       }
 
-      if (action === "logout") {
+      const allowed = handleProfileAction(action);
+      if (allowed === false) {
         return;
       }
 
@@ -100,6 +103,11 @@ export function AuthenticatedProfileDropdown({
     },
     [close, handleProfileAction, router],
   );
+
+  const handleLogoutConfirm = React.useCallback(() => {
+    setLogoutOpen(false);
+    handleProfileAction("logout");
+  }, [handleProfileAction]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -199,6 +207,12 @@ export function AuthenticatedProfileDropdown({
           ))}
         </div>
       ) : null}
+
+      <LogoutConfirmDialog
+        open={logoutOpen}
+        onOpenChange={setLogoutOpen}
+        onConfirm={handleLogoutConfirm}
+      />
     </div>
   );
 }
