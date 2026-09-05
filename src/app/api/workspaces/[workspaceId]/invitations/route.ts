@@ -46,7 +46,7 @@ export async function GET(_request: Request, context: RouteContext) {
 /**
  * POST /api/workspaces/[workspaceId]/invitations
  *
- * No email delivery. Returns acceptToken once for development/test acceptance.
+ * No email delivery. Raw acceptToken is never returned over the API.
  */
 export async function POST(request: Request, context: RouteContext) {
   try {
@@ -109,9 +109,6 @@ export async function POST(request: Request, context: RouteContext) {
           acceptedAt: invitation.acceptedAt,
           createdAt: invitation.createdAt,
         },
-        // Dev/test mechanism — no SMTP. Never log token_hash.
-        acceptToken: invitation.acceptToken,
-        acceptPath: `/api/workspaces/invitations/${invitation.id}/accept`,
       },
       { status: 201, headers: { "Cache-Control": "no-store" } },
     );

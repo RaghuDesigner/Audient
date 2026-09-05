@@ -111,7 +111,6 @@ export async function createWorkspaceInvite(input: {
   role: string;
 }): Promise<{
   invitation: ApiWorkspaceInvitation;
-  acceptToken: string;
 }> {
   const response = await fetch(
     `/api/workspaces/${encodeURIComponent(input.workspaceId)}/invitations`,
