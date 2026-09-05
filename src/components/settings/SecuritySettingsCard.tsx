@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { LogoutConfirmDialog } from "@/components/auth/LogoutConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { toast } from "@/components/ui/toast";
@@ -55,6 +56,7 @@ export function SecuritySettingsCard({
   const [errorKind, setErrorKind] = React.useState<"signOut" | "signOutAll">(
     "signOut",
   );
+  const [logoutOpen, setLogoutOpen] = React.useState(false);
 
   const [internalState, setInternalState] =
     React.useState<SecuritySettingsCardState>("default");
@@ -129,17 +131,17 @@ export function SecuritySettingsCard({
   };
 
   const handleSignOut = () => {
-    if (processing || isError) return;
-    securitySettingsCardAnalytics.signOutClicked();
-    void runAction(
-      "signOut",
-      onSignOut,
-      SECURITY_SETTINGS_CARD_COPY.signOutSuccess,
-    );
+    if (processing || isError || confirmOpen) return;
+    setLogoutOpen(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    setLogoutOpen(false);
+    void Promise.resolve(onSignOut());
   };
 
   const openSignOutAllConfirm = () => {
-    if (processing || isError) return;
+    if (processing || isError || logoutOpen) return;
     securitySettingsCardAnalytics.signOutAllDevicesClicked();
     setErrorKind("signOutAll");
     setState("confirmation");
@@ -267,7 +269,7 @@ export function SecuritySettingsCard({
               variant="outline"
               fullWidth
               className="sm:w-auto"
-              disabled={processing}
+              disabled={processing || confirmOpen}
               isLoading={processing && errorKind === "signOut"}
               onClick={handleSignOut}
             >
@@ -278,7 +280,7 @@ export function SecuritySettingsCard({
               variant="ghost"
               fullWidth
               className="sm:w-auto"
-              disabled={processing}
+              disabled={processing || logoutOpen}
               onClick={openSignOutAllConfirm}
             >
               {SECURITY_SETTINGS_CARD_COPY.signOutAll}
@@ -286,6 +288,15 @@ export function SecuritySettingsCard({
           </div>
         </>
       )}
+
+      <LogoutConfirmDialog
+        open={logoutOpen}
+        onOpenChange={(open) => {
+          if (processing) return;
+          setLogoutOpen(open);
+        }}
+        onConfirm={handleLogoutConfirm}
+      />
 
       <Modal
         open={confirmOpen}
