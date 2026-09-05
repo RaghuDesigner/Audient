@@ -44,7 +44,10 @@ export type CreateAuditInput = {
    * create-capable role. Defaults to personal workspace.
    */
   workspaceId?: string | null;
-  /** QA only — force failure after claim (not client-controlled failure code). */
+  /**
+   * Non-production QA only — force failure after claim.
+   * Rejected by POST /api/audits when NODE_ENV=production.
+   */
   simulateFailure?: boolean;
   /**
    * Transient screenshot for AI (data URL). Not persisted; storage upload is separate.

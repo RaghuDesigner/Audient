@@ -149,6 +149,20 @@ export async function POST(request: Request) {
       );
     }
 
+    if (
+      process.env.NODE_ENV === "production" &&
+      body.simulateFailure === true
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Simulated audit failures are unavailable in production.",
+          code: "SIMULATE_FAILURE_FORBIDDEN",
+        },
+        { status: 400 },
+      );
+    }
+
     const result = await createAuditForUser(supabase, user, {
       inputType,
       websiteUrl: body.websiteUrl ?? body.website ?? null,

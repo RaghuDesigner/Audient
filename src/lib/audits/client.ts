@@ -7,6 +7,7 @@ export type CreateAuditClientInput = {
   primaryAssetId?: string | null;
   /** Transient screenshot for AI (data URL). Not persisted. */
   imageDataUrl?: string | null;
+  /** Non-production QA only; rejected in production. */
   simulateFailure?: boolean;
 };
 
