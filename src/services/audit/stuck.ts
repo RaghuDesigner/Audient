@@ -28,6 +28,7 @@ export async function reclaimStuckProcessingAudit(
     .from("audits")
     .select("id, status, claimed_at, user_id")
     .eq("id", auditId)
+    .eq("user_id", appUserId)
     .is("deleted_at", null)
     .maybeSingle();
 
