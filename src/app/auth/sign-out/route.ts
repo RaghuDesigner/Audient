@@ -6,7 +6,7 @@ import { readSupabasePublicEnv } from "@/lib/supabase/env";
 
 /**
  * Sign out — clears Supabase session cookies (when configured) and mock cookie.
- * Prefer POST from UI; GET supported for simple links.
+ * POST only — GET must not log the user out (cross-site GET logout).
  */
 async function signOutAndRedirect(request: NextRequest) {
   const env = readSupabasePublicEnv();
@@ -20,14 +20,14 @@ async function signOutAndRedirect(request: NextRequest) {
   }
 
   const publicOrigin =
-  process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-  process.env.APP_URL?.trim() ||
-  new URL(request.url).origin;
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    process.env.APP_URL?.trim() ||
+    new URL(request.url).origin;
 
-const response = NextResponse.redirect(
-  new URL(AUTH_ROUTES.afterLogout, publicOrigin),
-  { status: 303 },
-);
+  const response = NextResponse.redirect(
+    new URL(AUTH_ROUTES.afterLogout, publicOrigin),
+    { status: 303 },
+  );
 
   response.cookies.set(MOCK_AUTH_COOKIE.name, "", {
     path: "/",
@@ -38,9 +38,5 @@ const response = NextResponse.redirect(
 }
 
 export async function POST(request: NextRequest) {
-  return signOutAndRedirect(request);
-}
-
-export async function GET(request: NextRequest) {
   return signOutAndRedirect(request);
 }

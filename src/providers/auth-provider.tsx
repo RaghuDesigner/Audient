@@ -270,7 +270,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {
         // Server route still clears cookies.
       }
-      window.location.assign(AUTH_ROUTES.signOut);
+      try {
+        await fetch(AUTH_ROUTES.signOut, {
+          method: "POST",
+          credentials: "same-origin",
+        });
+      } catch {
+        // Still leave the authenticated UI; navigation clears client state.
+      }
+      window.location.assign(AUTH_ROUTES.afterLogout);
       return;
     }
 
